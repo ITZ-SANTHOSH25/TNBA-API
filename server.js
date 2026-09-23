@@ -1042,15 +1042,21 @@ function validateBody(rules) {
 /* ============================================================================
  * 8. ROUTES
  * ========================================================================== */
-
 const app = express();
+
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "TN Blood Bank Backend is running"
+  });
+});
+
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: CONFIG.corsOrigin }));
 app.use(authenticate);
 
 const api = express.Router();
-
 // ---- Health / meta ----
 app.get('/health', (_req, res) => ok(res, { status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() }));
 app.get('/api/meta', (_req, res) => ok(res, {
