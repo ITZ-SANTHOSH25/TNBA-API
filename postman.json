@@ -1,0 +1,305 @@
+{
+  "info": {
+    "name": "TN Blood Bank Management System",
+    "description": "Complete API collection — 64 routes. Set the `baseUrl` variable (default http://localhost:4000). Login requests auto-save the token to `accessToken`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health & Meta",
+      "item": [
+        { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+        { "name": "Meta", "request": { "method": "GET", "url": "{{baseUrl}}/api/meta" } }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"newdonor@test.com\",\n  \"password\": \"Test@12345\",\n  \"fullName\": \"New Donor\",\n  \"role\": \"donor\",\n  \"bloodGroup\": \"O+\",\n  \"district\": \"Madurai\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Donor)",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.data) { pm.collectionVariables.set('accessToken', j.data.accessToken); pm.collectionVariables.set('refreshToken', j.data.refreshToken); }"] } }],
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"rajesh.kumar@email.com\",\n  \"password\": \"Donor@12345\"\n}" }
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["const j = pm.response.json();", "if (j.data) { pm.collectionVariables.set('accessToken', j.data.accessToken); pm.collectionVariables.set('refreshToken', j.data.refreshToken); }"] } }],
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@tnbloodbank.gov.in\",\n  \"password\": \"Admin@12345\"\n}" }
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/refresh",
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        },
+        { "name": "Me", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/auth/me" } },
+        { "name": "Logout", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/auth/logout" } }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        { "name": "Availability", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventory/availability?bloodGroup=O%2B&district=Chennai" } },
+        { "name": "Summary", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventory/summary" } },
+        { "name": "Blood Banks", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventory/blood-banks?district=Chennai" } },
+        {
+          "name": "Update Stock",
+          "request": {
+            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/inventory/stock",
+            "body": { "mode": "raw", "raw": "{\n  \"bloodGroup\": \"O+\",\n  \"component\": \"Whole Blood\",\n  \"units\": 40\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blood Requests",
+      "item": [
+        {
+          "name": "Create Request",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/requests",
+            "body": { "mode": "raw", "raw": "{\n  \"patientName\": \"Test Patient\",\n  \"bloodGroup\": \"A+\",\n  \"units\": 2,\n  \"urgency\": \"high\",\n  \"district\": \"Chennai\",\n  \"contactNumber\": \"+91 90000 00000\"\n}" }
+          }
+        },
+        { "name": "List Requests", "request": { "method": "GET", "url": "{{baseUrl}}/api/requests?status=pending" } },
+        { "name": "Get Request", "request": { "method": "GET", "url": "{{baseUrl}}/api/requests/1" } },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/requests/1/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Emergency",
+      "item": [
+        {
+          "name": "Create Emergency",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/emergency",
+            "body": { "mode": "raw", "raw": "{\n  \"patientName\": \"Emergency Case\",\n  \"bloodGroup\": \"O-\",\n  \"units\": 3,\n  \"contactNumber\": \"+91 91111 11111\",\n  \"district\": \"Chennai\"\n}" }
+          }
+        },
+        { "name": "List Emergency", "request": { "method": "GET", "url": "{{baseUrl}}/api/emergency?status=open" } },
+        { "name": "Get Emergency", "request": { "method": "GET", "url": "{{baseUrl}}/api/emergency/1" } },
+        {
+          "name": "Update Status",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/emergency/1/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_progress\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Donors",
+      "item": [
+        { "name": "List Donors", "request": { "method": "GET", "url": "{{baseUrl}}/api/donors?bloodGroup=B%2B" } },
+        { "name": "My Profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/donors/me" } },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/donors/me",
+            "body": { "mode": "raw", "raw": "{\n  \"district\": \"Coimbatore\",\n  \"weightKg\": 74\n}" }
+          }
+        },
+        { "name": "My History", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/donors/me/history" } },
+        { "name": "Get Donor", "request": { "method": "GET", "url": "{{baseUrl}}/api/donors/1" } }
+      ]
+    },
+    {
+      "name": "Camps",
+      "item": [
+        { "name": "List Camps", "request": { "method": "GET", "url": "{{baseUrl}}/api/camps?status=upcoming" } },
+        { "name": "Get Camp", "request": { "method": "GET", "url": "{{baseUrl}}/api/camps/1" } },
+        {
+          "name": "Create Camp",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/camps",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"New Camp\",\n  \"campDate\": \"2026-01-15\",\n  \"district\": \"Salem\"\n}" }
+          }
+        },
+        {
+          "name": "Update Camp",
+          "request": {
+            "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/camps/1",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ongoing\"\n}" }
+          }
+        },
+        { "name": "Register for Camp", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/camps/1/register" } },
+        { "name": "Cancel Registration", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/camps/1/register" } },
+        { "name": "Camp Registrations", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/camps/1/registrations" } },
+        {
+          "name": "Create Camp Request",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/camp-requests",
+            "body": { "mode": "raw", "raw": "{\n  \"organization\": \"Test Org\",\n  \"campDate\": \"2026-02-01\",\n  \"expectedDonors\": 100\n}" }
+          }
+        },
+        { "name": "List Camp Requests", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/camp-requests" } },
+        {
+          "name": "Update Camp Request Status",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/camp-requests/1/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"approved\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Donations",
+      "item": [
+        {
+          "name": "Record Donation",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/donations",
+            "body": { "mode": "raw", "raw": "{\n  \"donorId\": 1,\n  \"donationDate\": \"2025-01-10\",\n  \"component\": \"Whole Blood\",\n  \"units\": 1\n}" }
+          }
+        },
+        { "name": "List Donations", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/donations" } },
+        { "name": "Get Donation", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/donations/1" } }
+      ]
+    },
+    {
+      "name": "Eligibility",
+      "item": [
+        { "name": "Questions", "request": { "method": "GET", "url": "{{baseUrl}}/api/eligibility/questions" } },
+        { "name": "Criteria", "request": { "method": "GET", "url": "{{baseUrl}}/api/eligibility/criteria" } },
+        {
+          "name": "Evaluate",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/eligibility/evaluate",
+            "body": { "mode": "raw", "raw": "{\n  \"answers\": {\n    \"age\": true, \"weight\": true, \"health\": true,\n    \"lastDonation\": true, \"medication\": true, \"tattoo\": true, \"illness\": true\n  }\n}" }
+          }
+        },
+        {
+          "name": "Check",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/eligibility/check",
+            "body": { "mode": "raw", "raw": "{\n  \"answers\": {\n    \"age\": true, \"weight\": true, \"health\": true,\n    \"lastDonation\": true, \"medication\": true, \"tattoo\": true, \"illness\": true\n  }\n}" }
+          }
+        },
+        { "name": "History", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/eligibility/history" } }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "Submit Feedback",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/feedback",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Tester\",\n  \"email\": \"t@t.com\",\n  \"category\": \"praise\",\n  \"rating\": 5,\n  \"message\": \"Great service!\"\n}" }
+          }
+        },
+        { "name": "List Feedback", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/feedback" } },
+        { "name": "Get Feedback", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/feedback/1" } },
+        {
+          "name": "Update Feedback Status",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/feedback/1/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_review\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/notifications" } },
+        { "name": "Unread Count", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/notifications/unread-count" } },
+        { "name": "Mark Read", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/notifications/1/read" } },
+        { "name": "Mark All Read", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/notifications/read-all" } }
+      ]
+    },
+    {
+      "name": "Assistant",
+      "item": [
+        {
+          "name": "Chat",
+          "request": {
+            "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/assistant/chat",
+            "body": { "mode": "raw", "raw": "{\n  \"message\": \"Am I eligible to donate?\"\n}" }
+          }
+        },
+        { "name": "Suggest Banks", "request": { "method": "GET", "url": "{{baseUrl}}/api/assistant/suggest-banks?bloodGroup=O%2B" } }
+      ]
+    },
+    {
+      "name": "Content",
+      "item": [
+        { "name": "Announcements", "request": { "method": "GET", "url": "{{baseUrl}}/api/content/announcements" } },
+        { "name": "Health Tips", "request": { "method": "GET", "url": "{{baseUrl}}/api/content/health-tips" } },
+        { "name": "FAQs", "request": { "method": "GET", "url": "{{baseUrl}}/api/content/faqs" } },
+        { "name": "Home Stats", "request": { "method": "GET", "url": "{{baseUrl}}/api/content/home-stats" } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Stats", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/stats" } },
+        { "name": "Dashboard", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/dashboard" } },
+        { "name": "Blood Group Distribution", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/blood-group-distribution" } },
+        { "name": "Monthly Donations", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/monthly-donations" } },
+        { "name": "Hospitals", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/hospitals" } },
+        { "name": "Blood Banks", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": "{{baseUrl}}/api/admin/blood-banks" } },
+        {
+          "name": "Verify Hospital",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/admin/hospitals/1/verify",
+            "body": { "mode": "raw", "raw": "{\n  \"verified\": true\n}" }
+          }
+        },
+        {
+          "name": "Verify Blood Bank",
+          "request": {
+            "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{accessToken}}" }],
+            "url": "{{baseUrl}}/api/admin/blood-banks/1/verify",
+            "body": { "mode": "raw", "raw": "{\n  \"verified\": true\n}" }
+          }
+        }
+      ]
+    }
+  ]
+}
