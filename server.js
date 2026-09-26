@@ -1063,7 +1063,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: CONFIG.corsOrigin }));
 app.use(authenticate);
 
-const api = express.Router();
+
 // ---- Health / meta ----
 app.get('/health', (_req, res) => ok(res, { status: 'healthy', uptime: process.uptime(), timestamp: new Date().toISOString() }));
 app.get('/api/meta', (_req, res) => ok(res, {
